@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechShop - Accueil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 80px;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: white !important;
+        }
+
+        .navbar-custom .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-custom .nav-link.active {
+            color: white !important;
+            font-weight: 600;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 80px 0 100px;
+            border-radius: 0 0 40% 40% / 0 0 20% 20%;
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 60%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.05);
+            transform: rotate(25deg);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-weight: 900;
+            font-size: 3.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .hero .btn-hero {
+            background: white;
+            color: #4f46e5;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 40px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero .btn-hero:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .hero .badge-stats {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- SECTIONS --- */
+        .section-title {
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .section-title i {
+            color: #4f46e5;
+            font-size: 2rem;
+            background: #eef2ff;
+            padding: 10px;
+            border-radius: 1rem;
+        }
+
+        /* --- CARTES CATÉGORIES --- */
+        .category-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.5rem;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: 0.4s;
+            height: 100%;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        }
+
+        .category-card .icon {
+            font-size: 3rem;
+            color: #4f46e5;
+            background: #eef2ff;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            transition: 0.3s;
+        }
+
+        .category-card:hover .icon {
+            transform: scale(1.1);
+            background: #4f46e5;
+            color: white;
+        }
+
+        .category-card h5 {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .category-card p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* --- PRODUITS EN VEDETTE --- */
+        .product-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.2rem;
+            overflow: hidden;
+            transition: 0.4s;
+            height: 100%;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        }
+
+        .product-card img {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .product-card .body {
+            padding: 1.2rem;
+        }
+
+        .product-card .body h6 {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .product-card .body .price {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #4f46e5;
+        }
+
+        .product-card .body .badge-cat {
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* --- TÉMOIGNAGES --- */
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.2rem;
+            padding: 1.8rem;
+            text-align: center;
+            transition: 0.3s;
+            height: 100%;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        .testimonial-card .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #eef2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: #4f46e5;
+            margin: 0 auto 12px;
+        }
+
+        .testimonial-card blockquote {
+            font-size: 1rem;
+            color: #475569;
+            font-style: italic;
+        }
+
+        .testimonial-card .name {
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 8px;
+        }
+
+        /* --- NEWSLETTER --- */
+        .newsletter {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 2rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .newsletter h3 {
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .newsletter .input-group-custom {
+            max-width: 500px;
+            margin: 20px auto 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .newsletter .input-group-custom input {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            padding: 12px 20px;
+            background: white;
+        }
+
+        .newsletter .input-group-custom input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+            outline: none;
+        }
+
+        .newsletter .input-group-custom button {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            color: white;
+            font-weight: 600;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .newsletter .input-group-custom button:hover {
+            transform: scale(1.04);
+        }
+
+        /* --- FOOTER --- */
+        .footer-custom {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            padding: 30px 0;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .footer-custom .social-links a {
+            color: #94a3b8;
+            font-size: 1.3rem;
+            margin: 0 10px;
+            transition: 0.3s;
+        }
+
+        .footer-custom .social-links a:hover {
+            color: #4f46e5;
+            transform: translateY(-3px);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .hero { padding: 60px 0 80px; }
+            .newsletter { padding: 2rem 1.2rem; }
+            .newsletter .input-group-custom { flex-direction: column; }
+            .newsletter .input-group-custom button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <script src="/static/auth.js"></script>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
+                    
+                    
+                    <li class="nav-item"><a class="nav-link" href="/static/chat.html">💬 Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToAdmin()">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="container">
+            <h1>Bienvenue chez <br>TechShop</h1>
+            <p>Le spécialiste du matériel informatique et des solutions innovantes pour particuliers et professionnels.</p>
+            <a href="/static/catalogue.html" class="btn btn-hero">
+                <i class="bi bi-arrow-right-circle"></i> Découvrir nos produits
+            </a>
+            <div class="badge-stats">
+                <i class="bi bi-check-circle"></i> Livraison rapide · Paiement sécurisé · 24/7
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CATÉGORIES ===== -->
+    <div class="container">
+        <h2 class="section-title">
+            <i class="bi bi-grid-3x3-gap"></i> Catégories
+        </h2>
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="category-card">
+                    <div class="icon"><i class="bi bi-pc-display"></i></div>
+                    <h5>Gaming</h5>
+                    <p>PC, souris, casques</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="category-card">
+                    <div class="icon"><i class="bi bi-laptop"></i></div>
+                    <h5>Bureautique</h5>
+                    <p>Laptops, imprimantes</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="category-card">
+                    <div class="icon"><i class="bi bi-hdd-stack"></i></div>
+                    <h5>Stockage</h5>
+                    <p>Disques durs, SSD, clés USB</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="category-card">
+                    <div class="icon"><i class="bi bi-wifi"></i></div>
+                    <h5>Réseau</h5>
+                    <p>Routeurs, répéteurs, câbles</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PRODUITS EN VEDETTE ===== -->
+    <div class="container mt-5">
+        <h2 class="section-title">
+            <i class="bi bi-star-fill"></i> Produits en vedette
+        </h2>
+        <div class="row g-4" id="featuredProducts">
+            <div class="col-md-4">
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&h=300&fit=crop" alt="PC Gamer">
+                    <div class="body">
+                        <h6>PC Gamer Extreme</h6>
+                        <p class="text-muted" style="font-size:0.85rem;">Intel i7, RTX 4060, 32Go RAM</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">1499,99 €</span>
+                            <span class="badge-cat">gaming</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=400&h=300&fit=crop" alt="Laptop">
+                    <div class="body">
+                        <h6>Laptop Bureautique</h6>
+                        <p class="text-muted" style="font-size:0.85rem;">Core i5, 8Go RAM, 256Go SSD</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">599,99 €</span>
+                            <span class="badge-cat">bureautique</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop" alt="Casque">
+                    <div class="body">
+                        <h6>Casque Bluetooth</h6>
+                        <p class="text-muted" style="font-size:0.85rem;">Réduction de bruit, 30h d'autonomie</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">89,99 €</span>
+                            <span class="badge-cat">audio</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TÉMOIGNAGES ===== -->
+    <div class="container mt-5">
+        <h2 class="section-title">
+            <i class="bi bi-chat-quote"></i> Ce que nos clients disent
+        </h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="avatar"><i class="bi bi-person"></i></div>
+                    <blockquote>“TechShop m'a livré mon PC en 24h. Service impeccable !”</blockquote>
+                    <div class="name">— Jean D.</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="avatar"><i class="bi bi-person-fill"></i></div>
+                    <blockquote>“L'agent IA m'a trouvé le casque parfait pour mes besoins.”</blockquote>
+                    <div class="name">— Marie C.</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="avatar"><i class="bi bi-person-circle"></i></div>
+                    <blockquote>“Paiement sécurisé et suivi de commande en temps réel.”</blockquote>
+                    <div class="name">— Paul M.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NEWSLETTER ===== -->
+    <div class="container mt-5">
+        <div class="newsletter">
+            <h3>Restez informé</h3>
+            <p class="text-muted">Recevez nos meilleures offres et nouveautés directement dans votre boîte mail.</p>
+            <div class="input-group-custom">
+                <input type="email" placeholder="Votre adresse email">
+                <button onclick="alert('Merci de vous être abonné ! (simulation)')">
+                    <i class="bi bi-send"></i> S'abonner
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="social-links">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+                <a href="#"><i class="bi bi-youtube"></i></a>
+            </div>
+            <p class="mt-2 mb-0">&copy; 2025 TechShop - Projet Data Science & IA. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

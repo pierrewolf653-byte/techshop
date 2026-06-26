@@ -1,0 +1,86 @@
+[
+  {
+    "name": "PC Gamer Extreme",
+    "description": "Intel i7, RTX 4060, 32Go RAM, 1To SSD",
+    "price": 1499.99,
+    "category": "gaming",
+    "image_url": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Laptop Bureautique",
+    "description": "Core i5, 8Go RAM, 256Go SSD, 14 pouces",
+    "price": 599.99,
+    "category": "bureautique",
+    "image_url": "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Disque dur externe 2To",
+    "description": "USB 3.0, stockage portable",
+    "price": 79.99,
+    "category": "stockage",
+    "image_url": "https://images.unsplash.com/photo-1531498860502-7c67cf02f657?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Clé USB 128Go",
+    "description": "Ultra-rapide, USB 3.2, compatible PC/Mac",
+    "price": 24.99,
+    "category": "stockage",
+    "image_url": "https://images.unsplash.com/photo-1627989580309-bfaf3e58a2de?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Câble USB-C 2m",
+    "description": "Charge rapide, tressé, compatible tous appareils",
+    "price": 12.99,
+    "category": "accessoires",
+    "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Casque Bluetooth sans fil",
+    "description": "Réduction de bruit, autonomie 30h, son HD",
+    "price": 89.99,
+    "category": "audio",
+    "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Souris Gamer RGB",
+    "description": "Capteur 16000 DPI, 8 boutons programmables",
+    "price": 49.99,
+    "category": "gaming",
+    "image_url": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Routeur Wi-Fi 6",
+    "description": "Débit jusqu'à 1800 Mbps, couverture 150m²",
+    "price": 129.99,
+    "category": "réseau",
+    "image_url": "https://images.unsplash.com/photo-1543915316-0b2f5bb5f9c7?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Répéteur Wi-Fi",
+    "description": "Amplificateur de signal, compatible toutes box",
+    "price": 39.99,
+    "category": "réseau",
+    "image_url": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Carte SD 256Go",
+    "description": "Classe 10, U3, pour appareils photo et drones",
+    "price": 34.99,
+    "category": "stockage",
+    "image_url": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Téléphone Android",
+    "description": "6.5 pouces, 128Go, 5000mAh, double SIM",
+    "price": 299.99,
+    "category": "téléphonie",
+    "image_url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop"
+  },
+  {
+    "name": "Chargeur rapide 65W",
+    "description": "USB-C + USB-A, compatible PC, smartphone, tablette",
+    "price": 29.99,
+    "category": "accessoires",
+    "image_url": "https://images.unsplash.com/photo-1593941707882-ef5b8b4a7fc4?w=400&h=300&fit=crop"
+  }
+]

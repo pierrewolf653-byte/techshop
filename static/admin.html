@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - TechShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <script src="/static/auth.js"></script>
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
+                   
+                    
+                    <li class="nav-item"><a class="nav-link" href="/static/chat.html">💬 Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#" onclick="goToAdmin()">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h1>Administration</h1>
+        <div id="adminStats" class="card p-4">Chargement...</div>
+    </div>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/static/login_client.html';
+        fetch('/admin/stats', { headers: { 'token': token } })
+            .then(res => res.json())
+            .then(data => document.getElementById('adminStats').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`)
+            .catch(() => document.getElementById('adminStats').innerHTML = '<p class="text-danger">Erreur de chargement</p>');
+    </script>
+</body>
+</html>

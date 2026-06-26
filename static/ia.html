@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent IA - TechShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { font-family: 'Inter', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        .navbar-custom .navbar-brand i { margin-right: 8px; }
+        .navbar-custom .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 500;
+        }
+        .navbar-custom .nav-link:hover { color: white !important; }
+        .navbar-custom .nav-link.active { color: white !important; font-weight: 600; }
+
+        .card-ia {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            height: 100%;
+            transition: 0.3s;
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        .card-ia:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+        }
+        .card-ia .card-icon {
+            font-size: 2.4rem;
+            color: #4f46e5;
+            margin-bottom: 8px;
+            background: #eef2ff;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+        }
+        .card-ia h5 {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .card-ia p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-ia {
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-ia-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 6px 18px -8px rgba(79, 70, 229, 0.4);
+        }
+        .btn-ia-primary:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 10px 28px -8px rgba(79, 70, 229, 0.6);
+        }
+        .btn-ia-success {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            box-shadow: 0 6px 18px -8px rgba(5, 150, 105, 0.4);
+        }
+        .btn-ia-success:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 10px 28px -8px rgba(5, 150, 105, 0.6);
+        }
+        .btn-ia-whatsapp {
+            background: linear-gradient(135deg, #075e54, #128c7e);
+            color: white;
+            box-shadow: 0 6px 18px -8px rgba(7, 94, 84, 0.4);
+        }
+        .btn-ia-whatsapp:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 10px 28px -8px rgba(7, 94, 84, 0.6);
+        }
+        .btn-ia-auto {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+            box-shadow: 0 6px 18px -8px rgba(245, 158, 11, 0.4);
+        }
+        .btn-ia-auto:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 10px 28px -8px rgba(245, 158, 11, 0.6);
+        }
+        .btn-ia:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .result-box {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 0.75rem;
+            padding: 0.8rem 1rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            max-height: 170px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            margin-top: 12px;
+            color: #1e293b;
+        }
+        .result-box .placeholder {
+            color: #94a3b8;
+        }
+
+        .form-select-ia {
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            padding: 10px 16px;
+            background: white;
+            font-weight: 500;
+            color: #1e293b;
+            transition: 0.2s;
+        }
+        .form-select-ia:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+            outline: none;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.8rem;
+        }
+        .section-title i {
+            color: #4f46e5;
+            font-size: 2rem;
+            background: #eef2ff;
+            padding: 10px;
+            border-radius: 1rem;
+        }
+
+        .footer-custom {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            padding: 25px 0;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .card-ia { padding: 1.2rem; }
+            .section-title { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <script src="/static/auth.js"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
+                   
+                  
+                    <li class="nav-item"><a class="nav-link" href="/static/chat.html">💬 Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToAdmin()">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="section-title">
+            <i class="bi bi-robot"></i> Agent IA Marketing
+        </h1>
+
+        <div class="row g-4">
+            <!-- CARTE 1 : ANALYSE -->
+            <div class="col-lg-4">
+                <div class="card-ia">
+                    <div class="card-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h5>Analyse des intérêts</h5>
+                    <p>Détecte et regroupe automatiquement les centres d'intérêt des contacts.</p>
+                    <button id="analyzeBtn" class="btn-ia btn-ia-primary">
+                        <i class="bi bi-play-circle"></i> Lancer
+                    </button>
+                    <div id="analyzeResult" class="result-box">
+                        <span class="placeholder">Cliquez sur "Lancer"</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARTE 2 : GÉNÉRATION -->
+            <div class="col-lg-4">
+                <div class="card-ia">
+                    <div class="card-icon"><i class="bi bi-megaphone"></i></div>
+                    <h5>Générer une publicité</h5>
+                    <p>Choisissez un groupe et générez une publicité personnalisée.</p>
+                    <div class="d-flex gap-2">
+                        <select id="groupSelect" class="form-select form-select-ia flex-grow-1">
+                            <option value="1">🎮 Gaming</option>
+                            <option value="2">💼 Bureautique</option>
+                            <option value="3">💾 Stockage</option>
+                        </select>
+                        <button id="generateAdBtn" class="btn-ia btn-ia-success">
+                            <i class="bi bi-magic"></i>
+                        </button>
+                    </div>
+                    <div id="adResult" class="result-box">
+                        <span class="placeholder">Sélectionnez un groupe</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARTE 3 : ENVOI WHATSAPP -->
+            <div class="col-lg-4">
+                <div class="card-ia">
+                    <div class="card-icon"><i class="bi bi-whatsapp" style="color:#25D366;"></i></div>
+                    <h5>Envoyer sur WhatsApp</h5>
+                    <p>Envoyez la publicité à tous les contacts du groupe sélectionné.</p>
+                    <div class="d-flex gap-2">
+                        <select id="sendGroupSelect" class="form-select form-select-ia flex-grow-1">
+                            <option value="1">🎮 Gaming</option>
+                            <option value="2">💼 Bureautique</option>
+                            <option value="3">💾 Stockage</option>
+                        </select>
+                        <button id="sendCampaignBtn" class="btn-ia btn-ia-whatsapp">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                    <div id="sendResult" class="result-box">
+                        <span class="placeholder">Sélectionnez un groupe</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARTE 4 : CAMPAGNE AUTOMATIQUE -->
+            <div class="col-lg-4">
+                <div class="card-ia">
+                    <div class="card-icon"><i class="bi bi-rocket" style="color:#f59e0b;"></i></div>
+                    <h5>Campagne automatique</h5>
+                    <p>Analyse, génère et envoie en un seul clic.</p>
+                    <button id="autoCampaignBtn" class="btn-ia btn-ia-auto">
+                        <i class="bi bi-rocket"></i> Lancer la campagne
+                    </button>
+                    <div id="autoResult" class="result-box">
+                        <span class="placeholder">Cliquez sur "Lancer la campagne"</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 TechShop - Projet Data Science & IA</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Analyse ---
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('analyzeBtn');
+            const resultDiv = document.getElementById('analyzeResult');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+            resultDiv.textContent = '⏳ Analyse en cours...';
+
+            try {
+                const res = await fetch('/analyze-interests', { method: 'POST' });
+                const data = await res.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultDiv.textContent = '❌ Erreur : ' + err.message;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-play-circle"></i> Lancer';
+        });
+
+        // --- Génération ---
+        document.getElementById('generateAdBtn').addEventListener('click', async () => {
+            const groupId = document.getElementById('groupSelect').value;
+            const resultDiv = document.getElementById('adResult');
+            resultDiv.textContent = '⏳ Génération...';
+
+            try {
+                const res = await fetch(`/generate-ads/${groupId}`);
+                const data = await res.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultDiv.textContent = '❌ Erreur : ' + err.message;
+            }
+        });
+
+        // --- Envoi WhatsApp ---
+        document.getElementById('sendCampaignBtn').addEventListener('click', async () => {
+            const groupId = document.getElementById('sendGroupSelect').value;
+            const resultDiv = document.getElementById('sendResult');
+            const btn = document.getElementById('sendCampaignBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+            resultDiv.textContent = '⏳ Envoi des messages...';
+
+            try {
+                const res = await fetch(`/send-campaign/${groupId}`, { method: 'POST' });
+                const data = await res.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultDiv.textContent = '❌ Erreur : ' + err.message;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send"></i>';
+        });
+
+        // --- Campagne automatique ---
+        document.getElementById('autoCampaignBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('autoCampaignBtn');
+            const resultDiv = document.getElementById('autoResult');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> En cours...';
+            resultDiv.textContent = '⏳ Lancement de la campagne automatique...';
+
+            try {
+                const res = await fetch('/auto-campaign', { method: 'POST' });
+                const data = await res.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultDiv.textContent = '❌ Erreur : ' + err.message;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-rocket"></i> Lancer la campagne';
+        });
+
+        // --- Chargement auto d'un exemple ---
+        window.addEventListener('load', async () => {
+            try {
+                const res = await fetch('/generate-ads/1');
+                const data = await res.json();
+                if (!data.error) {
+                    document.getElementById('adResult').textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (e) { /* silencieux */ }
+        });
+    </script>
+</body>
+</html>

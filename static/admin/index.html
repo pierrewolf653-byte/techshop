@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - TechShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+
+        body {
+            background: #f0f4ff;
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-custom .navbar-brand { font-weight: 700; font-size: 1.5rem; color: white !important; }
+        .navbar-custom .navbar-brand i { margin-right: 8px; }
+        .navbar-custom .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
+        .navbar-custom .nav-link:hover { color: white !important; }
+        .navbar-custom .nav-link.active { color: white !important; font-weight: 600; }
+
+        .stats-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.2rem 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border-left: 4px solid #4f46e5;
+            transition: 0.3s;
+        }
+        .stats-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+        .stats-card .number { font-size: 2rem; font-weight: 700; color: #1e293b; }
+        .stats-card .label { color: #64748b; font-size: 0.9rem; }
+        .stats-card .icon { font-size: 1.8rem; color: #4f46e5; }
+
+        .card-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            margin-bottom: 1.5rem;
+        }
+        .card-section h5 { font-weight: 700; color: #1e293b; }
+
+        .table-responsive { max-height: 400px; overflow-y: auto; }
+        .table th { background: #f8fafc; position: sticky; top: 0; z-index: 10; }
+
+        .badge-admin { padding: 6px 14px; border-radius: 50px; font-weight: 500; }
+
+        .btn-add { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none; border-radius: 50px; padding: 8px 20px; font-weight: 600; transition: 0.3s; }
+        .btn-add:hover { transform: scale(1.05); }
+
+        .modal-content { border-radius: 1.2rem; border: none; }
+        .modal-header { border-bottom: none; }
+        .modal-footer { border-top: none; }
+
+        .footer-custom { text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 25px 0; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+    <script src="/static/auth.js"></script>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/upload.html">Importer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/ia.html">Agent IA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/chat.html">💬 Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#" onclick="goToAdmin()">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENU -->
+    <div class="container">
+        <h2><i class="bi bi-speedometer2"></i> Tableau de bord administrateur</h2>
+
+        <!-- STATS -->
+        <div class="row mt-3" id="statsContainer">
+            <div class="col-md-3 mb-3"><div class="stats-card"><div class="d-flex justify-content-between"><div><div class="number" id="statContacts">0</div><div class="label">Contacts</div></div><div class="icon"><i class="bi bi-people"></i></div></div></div></div>
+            <div class="col-md-3 mb-3"><div class="stats-card"><div class="d-flex justify-content-between"><div><div class="number" id="statProducts">0</div><div class="label">Produits</div></div><div class="icon"><i class="bi bi-box"></i></div></div></div></div>
+            <div class="col-md-3 mb-3"><div class="stats-card"><div class="d-flex justify-content-between"><div><div class="number" id="statUsers">0</div><div class="label">Utilisateurs</div></div><div class="icon"><i class="bi bi-person-badge"></i></div></div></div></div>
+            <div class="col-md-3 mb-3"><div class="stats-card"><div class="d-flex justify-content-between"><div><div class="number" id="statOrders">0</div><div class="label">Commandes</div></div><div class="icon"><i class="bi bi-cart-check"></i></div></div></div></div>
+        </div>
+
+        <!-- TABS -->
+        <ul class="nav nav-tabs mt-3" id="adminTabs" role="tablist">
+            <li class="nav-item"><a class="nav-link" href="/static/ia.html">Agent IA</a></li>
+            <li class="nav-item"><a class="nav-link" href="/static/upload.html">Importer</a></li>
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabContacts">📇 Contacts</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabProducts">📦 Produits</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabOrders">🛒 Commandes</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabUsers">👤 Utilisateurs</button></li>
+        </ul>
+
+        <div class="tab-content mt-3">
+            <!-- TAB CONTACTS -->
+            <div class="tab-pane fade show active" id="tabContacts">
+                <div class="card-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="bi bi-people"></i> Liste des contacts</h5>
+                        <span class="badge bg-primary" id="contactCount">0</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead><tr><th>ID</th><th>Nom</th><th>Téléphone</th><th>Email</th><th>Intérêts</th><th>Groupe</th><th>Action</th></tr></thead>
+                            <tbody id="contactsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB PRODUCTS -->
+            <div class="tab-pane fade" id="tabProducts">
+                <div class="card-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="bi bi-box"></i> Gestion des produits</h5>
+                        <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="bi bi-plus-circle"></i> Ajouter</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead><tr><th>ID</th><th>Nom</th><th>Catégorie</th><th>Prix</th><th>Action</th></tr></thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB ORDERS -->
+            <div class="tab-pane fade" id="tabOrders">
+                <div class="card-section">
+                    <h5><i class="bi bi-cart-check"></i> Commandes</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead><tr><th>ID</th><th>Utilisateur</th><th>Produits</th><th>Total</th><th>Statut</th><th>Méthode</th><th>Date</th></tr></thead>
+                            <tbody id="ordersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB USERS -->
+            <div class="tab-pane fade" id="tabUsers">
+                <div class="card-section">
+                    <h5><i class="bi bi-person-badge"></i> Utilisateurs</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead><tr><th>ID</th><th>Nom</th><th>Email</th><th>Rôle</th><th>Action</th></tr></thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AJOUT PRODUIT -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Ajouter un produit</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <form id="addProductForm">
+                    <div class="modal-body">
+                        <div class="mb-2"><label class="form-label">Nom</label><input type="text" class="form-control" id="prodName" required></div>
+                        <div class="mb-2"><label class="form-label">Description</label><textarea class="form-control" id="prodDesc" required></textarea></div>
+                        <div class="mb-2"><label class="form-label">Prix</label><input type="number" class="form-control" id="prodPrice" step="0.01" required></div>
+                        <div class="mb-2"><label class="form-label">Catégorie</label><input type="text" class="form-control" id="prodCategory" required></div>
+                        <div class="mb-2"><label class="form-label">URL Image</label><input type="text" class="form-control" id="prodImage" value="https://via.placeholder.com/200"></div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button type="submit" class="btn btn-primary">Ajouter</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-custom"><div class="container"><p class="mb-0">&copy; 2025 TechShop - Projet Data Science & IA</p></div></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/static/login_client.html';
+
+        // --- Fonction fetch sécurisée ---
+        async function apiFetch(url, options = {}) {
+            const res = await fetch(url, {
+                ...options,
+                headers: { 'token': token, ...options.headers }
+            });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Erreur serveur');
+            }
+            return res.json();
+        }
+
+        // --- Charger les stats ---
+        async function loadStats() {
+            try {
+                const data = await apiFetch('/admin/dashboard-stats');
+                document.getElementById('statContacts').textContent = data.contacts_total;
+                document.getElementById('statProducts').textContent = data.produits_total;
+                document.getElementById('statUsers').textContent = data.users_total;
+                document.getElementById('statOrders').textContent = data.orders_total;
+                document.getElementById('contactCount').textContent = data.contacts_total;
+            } catch (e) { console.error('Stats error:', e); }
+        }
+
+        // --- Charger les contacts ---
+        async function loadContacts() {
+            try {
+                const data = await apiFetch('/admin/contacts');
+                const tbody = document.getElementById('contactsTableBody');
+                tbody.innerHTML = '';
+                data.forEach(c => {
+                    tbody.innerHTML += `<tr><td>${c.id}</td><td>${c.nom}</td><td>${c.telephone || '-'}</td><td>${c.email || '-'}</td><td>${c.interets || '-'}</td><td>${c.group_id || '-'}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteContact(${c.id})"><i class="bi bi-trash"></i></button></td></tr>`;
+                });
+            } catch (e) { console.error('Contacts error:', e); }
+        }
+
+        // --- Charger les produits ---
+        async function loadProducts() {
+            try {
+                const data = await apiFetch('/products/');
+                const tbody = document.getElementById('productsTableBody');
+                tbody.innerHTML = '';
+                data.forEach(p => {
+                    tbody.innerHTML += `<tr><td>${p.id}</td><td>${p.name}</td><td>${p.category}</td><td>${p.price} €</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i></button></td></tr>`;
+                });
+            } catch (e) { console.error('Products error:', e); }
+        }
+
+        // --- Charger les commandes ---
+        async function loadOrders() {
+            try {
+                const data = await apiFetch('/admin/orders');
+                const tbody = document.getElementById('ordersTableBody');
+                tbody.innerHTML = '';
+                data.forEach(o => {
+                    const products = Array.isArray(o.products) ? o.products.map(p => p.name).join(', ') : o.products;
+                    tbody.innerHTML += `<tr><td>${o.id}</td><td>${o.user_id}</td><td>${products}</td><td>${o.total} €</td>
+                        <td><span class="badge ${o.status === 'paid' ? 'bg-success' : 'bg-warning'}">${o.status}</span></td>
+                        <td>${o.payment_method}</td><td>${new Date(o.created_at).toLocaleDateString()}</td></tr>`;
+                });
+            } catch (e) { console.error('Orders error:', e); }
+        }
+
+        // --- Charger les utilisateurs ---
+        async function loadUsers() {
+            try {
+                const data = await apiFetch('/admin/users');
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+                data.forEach(u => {
+                    tbody.innerHTML += `<tr><td>${u.id}</td><td>${u.nom}</td><td>${u.email}</td><td><span class="badge ${u.role === 'admin' ? 'bg-danger' : 'bg-secondary'}">${u.role}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="toggleUserRole(${u.id}, '${u.role}')"><i class="bi bi-arrow-repeat"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})"><i class="bi bi-trash"></i></button>
+                        </td></tr>`;
+                });
+            } catch (e) { console.error('Users error:', e); }
+        }
+
+        // --- CRUD Contacts ---
+        async function deleteContact(id) {
+            if (!confirm('Supprimer ce contact ?')) return;
+            try {
+                await apiFetch(`/admin/contact/${id}`, { method: 'DELETE' });
+                loadContacts();
+                loadStats();
+            } catch (e) { alert('Erreur: ' + e.message); }
+        }
+
+        // --- CRUD Produits ---
+        async function deleteProduct(id) {
+            if (!confirm('Supprimer ce produit ?')) return;
+            try {
+                await apiFetch(`/admin/product/${id}`, { method: 'DELETE' });
+                loadProducts();
+                loadStats();
+            } catch (e) { alert('Erreur: ' + e.message); }
+        }
+
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new URLSearchParams();
+            formData.append('name', document.getElementById('prodName').value);
+            formData.append('description', document.getElementById('prodDesc').value);
+            formData.append('price', document.getElementById('prodPrice').value);
+            formData.append('category', document.getElementById('prodCategory').value);
+            formData.append('image_url', document.getElementById('prodImage').value);
+            try {
+                await apiFetch('/admin/product/add', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+                document.getElementById('addProductModal').querySelector('.btn-close').click();
+                loadProducts();
+                loadStats();
+            } catch (e) { alert('Erreur: ' + e.message); }
+        });
+
+        // --- CRUD Utilisateurs ---
+        async function toggleUserRole(id, currentRole) {
+            const newRole = currentRole === 'admin' ? 'user' : 'admin';
+            if (!confirm(`Passer cet utilisateur en ${newRole} ?`)) return;
+            const formData = new URLSearchParams();
+            formData.append('role', newRole);
+            try {
+                await apiFetch(`/admin/user/${id}/role`, { method: 'PUT', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+                loadUsers();
+            } catch (e) { alert('Erreur: ' + e.message); }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Supprimer cet utilisateur ?')) return;
+            try {
+                await apiFetch(`/admin/user/${id}`, { method: 'DELETE' });
+                loadUsers();
+                loadStats();
+            } catch (e) { alert('Erreur: ' + e.message); }
+        }
+
+        // --- Initialisation ---
+        loadStats();
+        loadContacts();
+        loadProducts();
+        loadOrders();
+        loadUsers();
+    </script>
+</body>
+</html>

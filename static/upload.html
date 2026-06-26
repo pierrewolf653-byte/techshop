@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importer des contacts - TechShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: white !important;
+        }
+
+        .navbar-custom .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-custom .nav-link.active {
+            color: white !important;
+            font-weight: 600;
+        }
+
+        /* --- CARTE PRINCIPALE --- */
+        .upload-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2.8rem;
+            max-width: 650px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        .upload-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.12);
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-header .icon {
+            font-size: 3.2rem;
+            color: #4f46e5;
+            background: #eef2ff;
+            padding: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .upload-header h2 {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .upload-header p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        /* --- ZONE DE DÉPÔT --- */
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 1.2rem;
+            padding: 2.8rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            position: relative;
+        }
+
+        .drop-zone:hover {
+            border-color: #4f46e5;
+            background: #f1f5f9;
+        }
+
+        .drop-zone.dragover {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+
+        .drop-zone i {
+            font-size: 3.5rem;
+            color: #94a3b8;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone .title {
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .drop-zone .subtitle {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin: 4px 0;
+        }
+
+        .drop-zone .file-info {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* --- BOUTON --- */
+        .btn-upload {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            border-radius: 50px;
+            padding: 14px 0;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 1.2rem;
+            box-shadow: 0 8px 20px -8px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-upload:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 12px 28px -8px rgba(79, 70, 229, 0.6);
+        }
+
+        .btn-upload:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-upload i {
+            margin-right: 8px;
+        }
+
+        /* --- RÉSULTAT --- */
+        .alert-custom {
+            border-radius: 1rem;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .alert-custom.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+            border-left: 4px solid #059669;
+        }
+
+        .alert-custom.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            display: block;
+            border-left: 4px solid #dc2626;
+        }
+
+        .alert-custom i {
+            margin-right: 8px;
+        }
+
+        /* --- INFOS FORMAT --- */
+        .format-info {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 1rem;
+            padding: 1rem 1.2rem;
+            margin-top: 1.2rem;
+            font-size: 0.85rem;
+            color: #475569;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .format-info code {
+            background: #e2e8f0;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .format-info i {
+            color: #4f46e5;
+            margin-right: 6px;
+        }
+
+        .format-info .required {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        /* --- FOOTER --- */
+        .footer-custom {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            padding: 25px 0;
+            margin-top: auto;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 480px) {
+            .upload-card {
+                padding: 1.5rem 1.2rem;
+                border-radius: 1.2rem;
+            }
+            .upload-header .icon {
+                font-size: 2.6rem;
+                padding: 12px;
+            }
+            .upload-header h2 {
+                font-size: 1.4rem;
+            }
+            .drop-zone {
+                padding: 1.5rem 1rem;
+            }
+            .drop-zone i {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== AUTH.JS ===== -->
+    <script src="/static/auth.js"></script>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
+                    
+                    
+                    <li class="nav-item"><a class="nav-link" href="/static/chat.html">💬 Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToAdmin()">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== CONTENU ===== -->
+    <div class="container">
+        <div class="upload-card">
+            <!-- Entête -->
+            <div class="upload-header">
+                <div class="icon">
+                    <i class="bi bi-cloud-upload"></i>
+                </div>
+                <h2>Importer des contacts</h2>
+                <p>Importez vos contacts depuis un fichier Excel ou CSV</p>
+            </div>
+
+            <!-- Formulaire -->
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="drop-zone" id="dropZone">
+                    <i class="bi bi-file-earmark-arrow-up"></i>
+                    <div class="title">Glissez-déposez votre fichier ici</div>
+                    <div class="subtitle">ou</div>
+                    <div class="file-info" id="fileInfo">cliquez pour parcourir</div>
+                    <input type="file" id="fileInput" accept=".xlsx,.csv" required>
+                </div>
+
+                <button type="submit" class="btn-upload" id="uploadBtn">
+                    <i class="bi bi-upload"></i> Importer
+                </button>
+            </form>
+
+            <!-- Message de résultat -->
+            <div id="uploadResult" class="alert-custom"></div>
+
+            <!-- Informations sur le format -->
+            <div class="format-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>Colonnes requises :</strong>
+                <code>nom</code>
+                <code>telephone</code>
+                <code>email</code>
+                <span style="color:#94a3b8; margin:0 4px;">·</span>
+                <code>interets</code>
+                <span class="text-muted">(optionnel)</span>
+                <br>
+                <i class="bi bi-file-earmark-excel"></i>
+                Formats acceptés : <strong>.xlsx</strong> ou <strong>.csv</strong>
+                <span class="required">*</span> Le numéro de téléphone doit être au format international (<code>+509XXXXXXXX</code>)
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="footer-custom">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 TechShop - Projet Data Science & IA</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Affichage du nom du fichier ---
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                fileInfo.textContent = '📎 ' + this.files[0].name;
+                fileInfo.style.color = '#059669';
+            } else {
+                fileInfo.textContent = 'cliquez pour parcourir';
+                fileInfo.style.color = '#4f46e5';
+            }
+        });
+
+        // --- Drag & Drop ---
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInfo.textContent = '📎 ' + files[0].name;
+                fileInfo.style.color = '#059669';
+            }
+        });
+
+        // --- Soumission ---
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            const resultDiv = document.getElementById('uploadResult');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            if (!file) {
+                resultDiv.className = 'alert-custom error';
+                resultDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Veuillez sélectionner un fichier.';
+                return;
+            }
+
+            // Vérifier l'extension
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!['xlsx', 'csv'].includes(ext)) {
+                resultDiv.className = 'alert-custom error';
+                resultDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Format non supporté. Utilisez .xlsx ou .csv.';
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Importation en cours...';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/upload-contacts', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (res.ok) {
+                    resultDiv.className = 'alert-custom success';
+                    resultDiv.innerHTML = `<i class="bi bi-check-circle"></i> ${data.message || 'Contacts importés avec succès !'}`;
+                    fileInput.value = '';
+                    fileInfo.textContent = 'cliquez pour parcourir';
+                    fileInfo.style.color = '#4f46e5';
+                } else {
+                    resultDiv.className = 'alert-custom error';
+                    resultDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> ${data.detail || 'Erreur lors de l\'importation.'}`;
+                }
+            } catch (err) {
+                resultDiv.className = 'alert-custom error';
+                resultDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Erreur réseau : ${err.message}`;
+            }
+
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="bi bi-upload"></i> Importer';
+        });
+
+        // --- Déconnexion ---
+        document.getElementById('logoutLink')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/static/index.html';
+        });
+    </script>
+</body>
+</html>

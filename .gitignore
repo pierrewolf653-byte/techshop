@@ -1,0 +1,18 @@
+# Environnement virtuel
+venv/
+
+# Fichiers Python cache
+__pycache__/
+*.pyc
+
+# Base de données SQLite
+*.db
+
+# Fichier d'environnement (clés API)
+.env
+
+# Fichiers de logs
+*.log
+
+# Fichiers de configuration locaux
+*.local

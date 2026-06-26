@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat IA - TechShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: white !important;
+        }
+
+        .navbar-custom .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-custom .nav-link.active {
+            color: white !important;
+            font-weight: 600;
+        }
+
+        /* --- CARTE CHAT --- */
+        .chat-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .chat-card:hover {
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.12);
+        }
+
+        .section-title {
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title i {
+            color: #4f46e5;
+            font-size: 2rem;
+        }
+
+        .chat-subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
+        }
+
+        /* --- ZONE DE CHAT --- */
+        #chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            border-radius: 1rem;
+            background: rgba(248, 250, 252, 0.7);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- MESSAGES --- */
+        .message {
+            max-width: 80%;
+            padding: 0.7rem 1.2rem;
+            border-radius: 1.2rem;
+            margin-bottom: 0.6rem;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border-bottom-right-radius: 0.2rem;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 0.2rem;
+        }
+
+        .message.bot.error {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .message .time {
+            font-size: 0.6rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .message.user .time {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .message.bot .time {
+            color: #94a3b8;
+        }
+
+        /* --- INDICATEUR DE TYPAGE --- */
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.2rem;
+            border-bottom-left-radius: 0.2rem;
+            padding: 0.5rem 1.2rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            animation: dot 1.2s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dot {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-3px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- INPUT --- */
+        .input-group-custom {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .input-group-custom input {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            padding: 0.75rem 1.4rem;
+            font-size: 0.95rem;
+            background: white;
+            transition: 0.2s;
+        }
+
+        .input-group-custom input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+            outline: none;
+        }
+
+        .input-group-custom button {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            color: white;
+            font-weight: 600;
+            transition: 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 6px 18px -8px rgba(79, 70, 229, 0.4);
+        }
+
+        .input-group-custom button:hover:not(:disabled) {
+            transform: scale(1.04);
+            box-shadow: 0 10px 28px -8px rgba(79, 70, 229, 0.6);
+        }
+
+        .input-group-custom button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* --- STATUT OLLAMA --- */
+        .ollama-status {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .ollama-status .online {
+            color: #059669;
+        }
+
+        .ollama-status .offline {
+            color: #dc2626;
+        }
+
+        /* --- FOOTER --- */
+        .footer-custom {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            padding: 25px 0;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .chat-card { padding: 1rem; }
+            #chat-box { height: 300px; }
+            .message { max-width: 90%; font-size: 0.9rem; }
+            .input-group-custom button { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+            .section-title { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== AUTH.JS ===== -->
+    <script src="/static/auth.js"></script>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
+                    
+                   
+                    <li class="nav-item"><a class="nav-link active" href="/static/chat.html">💬 Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToAdmin()">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== CHAT ===== -->
+    <div class="container">
+        <div class="chat-card">
+            <h1 class="section-title">
+                <i class="bi bi-chat-dots"></i> Assistant IA TechShop
+            </h1>
+            <p class="chat-subtitle">
+                Posez vos questions sur nos produits, les promotions, ou demandez des conseils.
+            </p>
+
+            <!-- Zone de chat -->
+            <div id="chat-box"></div>
+
+            <!-- Indicateur de typage -->
+            <div class="typing-indicator" id="typingIndicator">
+                <span>●</span><span>●</span><span>●</span> L'IA réfléchit...
+            </div>
+
+            <!-- Input -->
+            <div class="input-group-custom">
+                <input type="text" id="messageInput" placeholder="Écrivez votre message..." autofocus>
+                <button id="sendBtn"><i class="bi bi-send"></i> Envoyer</button>
+            </div>
+
+            <!-- Statut Ollama -->
+            <div class="ollama-status" id="ollamaStatus">
+                <i class="bi bi-circle-fill offline"></i> Vérification du service IA...
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 TechShop - Projet Data Science & IA</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Éléments du DOM ---
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const ollamaStatus = document.getElementById('ollamaStatus');
+
+        // --- Historique de la conversation ---
+        let conversationHistory = [];  // tableau d'objets {role, content}
+
+        // --- Vérifier le statut d'Ollama ---
+        async function checkOllamaStatus() {
+            try {
+                const res = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(2000) });
+                if (res.ok) {
+                    ollamaStatus.innerHTML = '<i class="bi bi-circle-fill online"></i> Service IA connecté (Ollama)';
+                    ollamaStatus.className = 'ollama-status online';
+                    return true;
+                } else {
+                    throw new Error('Service indisponible');
+                }
+            } catch (e) {
+                ollamaStatus.innerHTML = '<i class="bi bi-circle-fill offline"></i> ⚠️ Ollama non accessible. Vérifie que le serveur est lancé.';
+                ollamaStatus.className = 'ollama-status offline';
+                return false;
+            }
+        }
+
+        // --- Ajouter un message ---
+        function addMessage(text, sender, isError = false) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            if (isError) div.classList.add('error');
+            const now = new Date();
+            const time = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            div.innerHTML = `${text} <span class="time">${time}</span>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Ajouter à l'historique (sauf pour les messages d'erreur)
+            if (!isError) {
+                conversationHistory.push({ role: sender === 'user' ? 'user' : 'assistant', content: text });
+                // Limiter l'historique à 20 messages maximum (10 échanges)
+                if (conversationHistory.length > 20) {
+                    conversationHistory = conversationHistory.slice(-20);
+                }
+            }
+        }
+
+        // --- Vérifier l'authentification ---
+        function getToken() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                addMessage('🔐 Vous devez être connecté pour utiliser le chat.', 'bot', true);
+                setTimeout(() => {
+                    window.location.href = '/static/login_client.html';
+                }, 1500);
+                return null;
+            }
+            return token;
+        }
+
+        // --- Envoyer un message ---
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            const token = getToken();
+            if (!token) return;
+
+            // Afficher le message de l'utilisateur
+            addMessage(message, 'user');
+            messageInput.value = '';
+            messageInput.focus();
+
+            typingIndicator.style.display = 'block';
+            sendBtn.disabled = true;
+
+            try {
+                // Vérifier Ollama
+                const isOllamaReady = await checkOllamaStatus();
+                if (!isOllamaReady) {
+                    addMessage('⚠️ Le service IA n\'est pas disponible. Vérifie que le serveur Ollama est lancé dans un autre terminal.', 'bot', true);
+                    typingIndicator.style.display = 'none';
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                // Envoyer l'historique (sans le dernier message qui vient d'être ajouté)
+                const historyToSend = conversationHistory.slice(0, -1);  // exclure le message qu'on vient d'ajouter
+                const historyJson = JSON.stringify(historyToSend);
+
+                const response = await fetch(`/chat?message=${encodeURIComponent(message)}&history=${encodeURIComponent(historyJson)}`, {
+                    method: 'POST',
+                    headers: { 'token': token }
+                });
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    addMessage('🔐 Votre session a expiré. Veuillez vous reconnecter.', 'bot', true);
+                    setTimeout(() => {
+                        window.location.href = '/static/login_client.html';
+                    }, 2000);
+                    typingIndicator.style.display = 'none';
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                typingIndicator.style.display = 'none';
+
+                if (response.ok) {
+                    addMessage(data.reponse, 'bot');
+                } else {
+                    addMessage('❌ ' + (data.detail || 'Erreur de connexion'), 'bot', true);
+                }
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                addMessage('❌ Erreur réseau. Veuillez réessayer.', 'bot', true);
+                console.error(error);
+            }
+
+            sendBtn.disabled = false;
+        }
+
+        // --- Événements ---
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // --- Message de bienvenue ---
+        addMessage('👋 Bonjour ! Je suis l\'assistant IA de TechShop. Comment puis-je vous aider aujourd\'hui ?', 'bot');
+        checkOllamaStatus();
+    </script>
+</body>
+</html>

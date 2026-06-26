@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier - TechShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: white !important;
+        }
+
+        .navbar-custom .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-custom .nav-link.active {
+            color: white !important;
+            font-weight: 600;
+        }
+
+        /* --- SECTION TITRE --- */
+        .section-title {
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .section-title i {
+            color: #4f46e5;
+            font-size: 2rem;
+            background: #eef2ff;
+            padding: 10px;
+            border-radius: 1rem;
+        }
+
+        /* --- CARTE PANIER --- */
+        .cart-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+            transition: 0.3s;
+        }
+
+        /* --- PANIER VIDE --- */
+        .empty-cart {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .empty-cart .icon {
+            font-size: 5rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .empty-cart h4 {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .empty-cart p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .empty-cart .btn-shop {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            color: white;
+            font-weight: 600;
+            transition: 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .empty-cart .btn-shop:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        /* --- ARTICLES --- */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 1rem;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item .item-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 0.75rem;
+            object-fit: cover;
+            background: #f1f5f9;
+            flex-shrink: 0;
+        }
+
+        .cart-item .item-info {
+            flex: 1;
+        }
+
+        .cart-item .item-info .name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+
+        .cart-item .item-info .price {
+            color: #4f46e5;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .cart-item .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-item .item-actions .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #1e293b;
+            font-weight: 700;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-item .item-actions .qty-btn:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+
+        .cart-item .item-actions .qty {
+            font-weight: 600;
+            color: #1e293b;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .cart-item .item-actions .btn-remove {
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-size: 1.2rem;
+            transition: 0.2s;
+            padding: 4px 8px;
+        }
+
+        .cart-item .item-actions .btn-remove:hover {
+            transform: scale(1.2);
+        }
+
+        /* --- RÉCAPITULATIF --- */
+        .cart-summary {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .cart-summary .total {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .cart-summary .total-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #4f46e5;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .payment-methods button {
+            flex: 1;
+            border-radius: 50px;
+            padding: 12px;
+            font-weight: 700;
+            border: none;
+            transition: 0.3s;
+            min-width: 120px;
+        }
+
+        .payment-methods button:hover:not(:disabled) {
+            transform: scale(1.02);
+        }
+
+        .btn-moncash {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .btn-natcash {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .payment-methods button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* --- ALERTE --- */
+        .alert-custom {
+            border-radius: 0.75rem;
+            padding: 0.8rem 1.2rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .alert-custom.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .alert-custom.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            display: block;
+        }
+
+        .alert-custom i {
+            margin-right: 8px;
+        }
+
+        /* --- FOOTER --- */
+        .footer-custom {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            padding: 25px 0;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .cart-card {
+                padding: 1.2rem;
+            }
+            .cart-item {
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+            .cart-item .item-img {
+                width: 60px;
+                height: 60px;
+            }
+            .cart-item .item-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .payment-methods {
+                flex-direction: column;
+            }
+            .payment-methods button {
+                width: 100%;
+            }
+            .section-title {
+                font-size: 1.3rem;
+            }
+            .section-title i {
+                font-size: 1.4rem;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== AUTH.JS ===== -->
+    <script src="/static/auth.js"></script>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/static/cart.html">🛒 Panier</a></li>
+                   
+                    
+                    <li class="nav-item"><a class="nav-link" href="/static/chat.html">💬 Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="goToAdmin()">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== CONTENU ===== -->
+    <div class="container">
+        <h1 class="section-title">
+            <i class="bi bi-cart"></i> Mon panier
+        </h1>
+
+        <div class="cart-card" id="cartContainer">
+            <!-- Rempli par JavaScript -->
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 TechShop - Projet Data Science & IA</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Déconnexion ---
+        document.getElementById('logoutLink')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/static/index.html';
+        });
+
+        // --- Panier ---
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+        function renderCart() {
+            const container = document.getElementById('cartContainer');
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="icon"><i class="bi bi-cart-x"></i></div>
+                        <h4>Votre panier est vide</h4>
+                        <p>Découvrez notre catalogue et ajoutez vos premiers articles.</p>
+                        <a href="/static/catalogue.html" class="btn-shop">
+                            <i class="bi bi-arrow-right-circle"></i> Découvrir le catalogue
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let itemsHtml = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const price = parseFloat(item.price || 0);
+                const qty = parseInt(item.qty || 1);
+                const subtotal = price * qty;
+                total += subtotal;
+
+                const img = item.image_url || 'https://via.placeholder.com/70';
+
+                itemsHtml += `
+                    <div class="cart-item">
+                        <img src="${img}" alt="${item.name}" class="item-img">
+                        <div class="item-info">
+                            <div class="name">${item.name}</div>
+                            <div class="price">${(price * qty).toFixed(2)} €</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="qty-btn" onclick="updateQty(${index}, -1)">−</button>
+                            <span class="qty">${qty}</span>
+                            <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                            <button class="btn-remove" onclick="removeItem(${index})"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = `
+                ${itemsHtml}
+                <div class="cart-summary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="total">Total</span>
+                        <span class="total-price">${total.toFixed(2)} €</span>
+                    </div>
+                    <div class="payment-methods">
+                        <button class="btn-moncash" onclick="checkout('moncash')">
+                            <i class="bi bi-credit-card"></i> Moncash
+                        </button>
+                        <button class="btn-natcash" onclick="checkout('natcash')">
+                            <i class="bi bi-credit-card"></i> Natcash
+                        </button>
+                    </div>
+                    <div id="paymentResult" class="alert-custom"></div>
+                </div>
+            `;
+        }
+
+        function updateQty(index, delta) {
+            if (!cart[index]) return;
+            const newQty = (cart[index].qty || 1) + delta;
+            if (newQty < 1) {
+                removeItem(index);
+                return;
+            }
+            cart[index].qty = newQty;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        async function checkout(method) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/static/login_client.html';
+                return;
+            }
+
+            if (cart.length === 0) {
+                const resultDiv = document.getElementById('paymentResult');
+                resultDiv.className = 'alert-custom error';
+                resultDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Votre panier est vide.';
+                return;
+            }
+
+            const btn = document.querySelector(`.btn-${method}`);
+            if (btn) btn.disabled = true;
+
+            const resultDiv = document.getElementById('paymentResult');
+            resultDiv.className = 'alert-custom';
+            resultDiv.innerHTML = '<i class="bi bi-hourglass-split"></i> Traitement du paiement...';
+            resultDiv.style.display = 'block';
+
+            try {
+                const res = await fetch('/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'token': token
+                    },
+                    body: `payment_method=${method}`
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    resultDiv.className = 'alert-custom success';
+                    resultDiv.innerHTML = `<i class="bi bi-check-circle"></i> ${data.message}`;
+                    cart = [];
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    setTimeout(renderCart, 1500);
+                } else {
+                    resultDiv.className = 'alert-custom error';
+                    resultDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> ${data.detail || 'Erreur de paiement'}`;
+                }
+            } catch (err) {
+                resultDiv.className = 'alert-custom error';
+                resultDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Erreur réseau : ${err.message}`;
+            }
+
+            if (btn) btn.disabled = false;
+        }
+
+        renderCart();
+    </script>
+</body>
+</html>

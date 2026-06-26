@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement - TechShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #fafafa; padding-top: 80px; min-height: 100vh; display: flex; flex-direction: column; }
+        .navbar-custom {
+            background: white !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-custom .navbar-brand { color: #111827 !important; font-weight: 700; font-size: 1.5rem; }
+        .navbar-custom .navbar-brand i { margin-right: 8px; }
+        .navbar-custom .nav-link { color: #6b7280 !important; font-weight: 500; }
+        .navbar-custom .nav-link:hover { color: #111827 !important; }
+        .navbar-custom .nav-link.active { color: #111827 !important; font-weight: 600; }
+
+        .payment-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .payment-card .icon { font-size: 2.5rem; color: #4f46e5; }
+        .btn-payment {
+            border-radius: 0.75rem;
+            padding: 14px 0;
+            font-weight: 600;
+            width: 100%;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-moncash { background: #1a73e8; color: white; }
+        .btn-moncash:hover { background: #1557b0; }
+        .btn-natcash { background: #e67e22; color: white; }
+        .btn-natcash:hover { background: #d35400; }
+
+        .footer-custom {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            padding: 25px 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/static/index.html"><i class="bi bi-laptop"></i> TechShop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/static/checkout.html">💳 Paiement</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dashboard">👤 Mon compte</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#admin">🔐 Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" id="logoutLink">🚪 Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="payment-card">
+            <h2 class="text-center"><i class="bi bi-credit-card"></i> Paiement</h2>
+            <p class="text-center text-muted">Choisissez votre méthode de paiement</p>
+            <div id="paymentResult" class="alert alert-info" style="display:none;"></div>
+            <button class="btn-payment btn-moncash mb-3" onclick="payWith('moncash')">
+                <i class="bi bi-credit-card"></i> Moncash
+            </button>
+            <button class="btn-payment btn-natcash" onclick="payWith('natcash')">
+                <i class="bi bi-credit-card"></i> Natcash
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer-custom">
+        <div class="container"><p class="mb-0">&copy; 2025 TechShop - Projet Data Science & IA</p></div>
+    </footer>
+
+    <script>
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/static/index.html';
+        });
+
+        function payWith(method) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/static/login_client.html';
+                return;
+            }
+            const resultDiv = document.getElementById('paymentResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'alert alert-info';
+            resultDiv.textContent = '⏳ Traitement du paiement...';
+
+            fetch('/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': token
+                },
+                body: JSON.stringify({ payment_method: method })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    resultDiv.className = 'alert alert-success';
+                    resultDiv.textContent = '✅ ' + data.message;
+                    localStorage.removeItem('cart');
+                } else {
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.textContent = '❌ ' + (data.detail || 'Erreur');
+                }
+            })
+            .catch(err => {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.textContent = '❌ Erreur réseau : ' + err.message;
+            });
+        }
+    </script>
+</body>
+</html>
