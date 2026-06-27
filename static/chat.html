@@ -381,6 +381,7 @@
                 // Construire le corps de la requête (x-www-form-urlencoded)
                 const formData = new URLSearchParams();
                 formData.append('message', message);
+                // Envoyer l'historique (sans le dernier message)
                 formData.append('history', JSON.stringify(conversationHistory.slice(0, -1)));
 
                 const response = await fetch('/chat', {
@@ -393,6 +394,7 @@
                 });
 
                 const data = await response.json();
+                console.log("📦 Réponse du serveur :", data);
 
                 if (response.status === 401) {
                     localStorage.removeItem('token');
@@ -408,9 +410,14 @@
                 typingIndicator.style.display = 'none';
 
                 if (response.ok) {
-                    addMessage(data.reponse || 'Désolé, je n\'ai pas de réponse.', 'bot');
+                    // Extraire la réponse (peut être dans "reponse", "message" ou "detail")
+                    const reply = data.reponse || data.message || data.detail || 'Désolé, je n\'ai pas de réponse.';
+                    // Si c'est un objet, le convertir en chaîne lisible
+                    const replyText = typeof reply === 'string' ? reply : JSON.stringify(reply);
+                    addMessage(replyText, 'bot');
                 } else {
-                    addMessage('❌ ' + (data.detail || 'Erreur de connexion'), 'bot', true);
+                    const errorMsg = data.detail || 'Erreur de connexion';
+                    addMessage('❌ ' + errorMsg, 'bot', true);
                 }
             } catch (error) {
                 typingIndicator.style.display = 'none';
@@ -430,7 +437,7 @@
         // --- Message de bienvenue ---
         addMessage('👋 Bonjour ! Je suis l\'assistant IA de TechShop. Comment puis-je vous aider aujourd\'hui ?', 'bot');
 
-        // --- Statut de l'IA (toujours actif avec Groq) ---
+        // --- Statut IA prêt ---
         aiStatus.innerHTML = '<i class="bi bi-circle-fill online"></i> Assistant IA prêt (Groq)';
     </script>
 </body>
