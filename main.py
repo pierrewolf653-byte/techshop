@@ -15,13 +15,9 @@ from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from apscheduler.schedulers.background import BackgroundScheduler
-from groq import Groq  # <--- IMPORT GROQ
+from groq import Groq
 
 load_dotenv()
-
-# --- LOGS DE DÉMARRAGE ---
-print("🔍 Démarrage de main.py")
-print(f"GROQ_API_KEY définie ? {bool(os.getenv('GROQ_API_KEY'))}")
 
 from models import Base, Product as ProductModel, Contact, User, Order
 from products import router as products_router
@@ -194,10 +190,18 @@ def get_profile(token: str = Header(...), db: Session = Depends(get_db)):
     except JWTError:
         raise HTTPException(401, "Token invalide ou expiré")
 
-# ---------- CHAT IA AVEC GROQ ----------
+# ---------- CHAT IA AVEC GROQ (CORRIGÉ) ----------
 @app.post("/chat")
-async def chat(message: str, history: str = "", token: str = Header(...)):
-    # --- LOGS DE DÉBOGAGE ---
+async def chat(
+    message: str = Form(...),          # <-- CORRECTION : Form au lieu de query
+    history: str = Form(""),           # <-- CORRECTION : Form au lieu de query
+    token: str = Header(...)
+):
+    """
+    message : le nouveau message de l'utilisateur
+    history : chaîne JSON contenant l'historique des messages précédents
+              (ex: [{"role":"user","content":"bonjour"},{"role":"assistant","content":"bonjour"}])
+    """
     print(f"📩 Message reçu : {message[:30]}..." if message else "📩 Message reçu (vide)")
     groq_api_key = os.getenv("GROQ_API_KEY")
     print(f"🔑 Clé GROQ : {'✅ présente' if groq_api_key else '❌ manquante'}")
@@ -239,7 +243,7 @@ async def chat(message: str, history: str = "", token: str = Header(...)):
         client = Groq(api_key=groq_api_key)
 
         chat_completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",  # Modèle gratuit et rapide
+            model="llama-3.1-8b-instant",
             messages=messages,
             temperature=0.7,
             max_tokens=300,
@@ -577,7 +581,7 @@ def admin_dashboard_stats(db: Session = Depends(get_db)):
         "orders_pending": orders_pending
     }
 
-# ---------- ADMIN : CONTACTS, GROUPES ----------
+# ---------- ADMIN : CONTACTS, GROUPES (existants) ----------
 @app.get("/admin/stats")
 def admin_stats(db: Session = Depends(get_db)):
     contacts_total = db.query(Contact).count()
