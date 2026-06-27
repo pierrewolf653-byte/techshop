@@ -72,14 +72,35 @@ document.addEventListener('DOMContentLoaded', function () {
         addMessage(text, 'user');
         input.value = '';
 
-        // Récupérer le token si présent
+        // Récupérer le token
         const token = localStorage.getItem('token') || '';
 
         try {
-            const res = await fetch(`/api/chat?message=${encodeURIComponent(text)}&token=${encodeURIComponent(token)}`, { method: 'POST' });
+            // Construction des données au format x-www-form-urlencoded
+            const formData = new URLSearchParams();
+            formData.append('message', text);
+            formData.append('history', ''); // historique non géré ici
+
+            const res = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'token': token  // Le token est envoyé dans le header (comme attendu par le backend)
+                },
+                body: formData.toString()
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Erreur ${res.status}: ${errorText}`);
+            }
+
             const data = await res.json();
-            addMessage(data.response, 'bot');
-        } catch {
+            const reply = data.reponse || "Désolé, je n'ai pas de réponse.";
+            addMessage(reply, 'bot');
+
+        } catch (error) {
+            console.error('Erreur chat:', error);
             addMessage("Désolé, une erreur s'est produite. Veuillez réessayer.", 'bot');
         }
     }
