@@ -15,14 +15,16 @@ from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from apscheduler.schedulers.background import BackgroundScheduler
-from groq import Groq  # <--- NOUVEAU : import Groq
+from groq import Groq  # <--- IMPORT GROQ
 
 load_dotenv()
 
+# --- LOGS DE DÉMARRAGE ---
+print("🔍 Démarrage de main.py")
+print(f"GROQ_API_KEY définie ? {bool(os.getenv('GROQ_API_KEY'))}")
+
 from models import Base, Product as ProductModel, Contact, User, Order
 from products import router as products_router
-
-# (pas d'import global de pywhatkit ici)
 
 Base.metadata.create_all(bind=engine)
 
@@ -192,14 +194,14 @@ def get_profile(token: str = Header(...), db: Session = Depends(get_db)):
     except JWTError:
         raise HTTPException(401, "Token invalide ou expiré")
 
-# ---------- CHAT IA AVEC GROQ (remplace Ollama) ----------
+# ---------- CHAT IA AVEC GROQ ----------
 @app.post("/chat")
 async def chat(message: str, history: str = "", token: str = Header(...)):
-    """
-    message : le nouveau message de l'utilisateur
-    history : chaîne JSON contenant l'historique des messages précédents
-              (ex: [{"role":"user","content":"bonjour"},{"role":"assistant","content":"bonjour"}])
-    """
+    # --- LOGS DE DÉBOGAGE ---
+    print(f"📩 Message reçu : {message[:30]}..." if message else "📩 Message reçu (vide)")
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    print(f"🔑 Clé GROQ : {'✅ présente' if groq_api_key else '❌ manquante'}")
+
     # 1. Vérification du token JWT
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -230,9 +232,9 @@ async def chat(message: str, history: str = "", token: str = Header(...)):
 
     # 3. Appel à l'API Groq
     try:
-        groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
-            raise HTTPException(500, "GROQ_API_KEY non définie dans les variables d'environnement")
+            print("❌ GROQ_API_KEY non définie dans les variables d'environnement")
+            raise HTTPException(500, "GROQ_API_KEY non définie")
 
         client = Groq(api_key=groq_api_key)
 
@@ -246,10 +248,11 @@ async def chat(message: str, history: str = "", token: str = Header(...)):
         )
 
         reply = chat_completion.choices[0].message.content
+        print(f"✅ Réponse générée : {reply[:50]}...")
         return {"reponse": reply}
 
     except Exception as e:
-        print(f"Erreur Groq : {str(e)}")
+        print(f"❌ Erreur Groq : {str(e)}")
         raise HTTPException(500, f"Erreur de l'IA : {str(e)}")
 
 # ---------- PANIER ET PAIEMENT ----------
@@ -277,7 +280,6 @@ def checkout(payment_method: str = Form(...), token: str = Header(...), db: Sess
 
     if payment_method not in ["moncash", "natcash"]:
         raise HTTPException(400, "Méthode de paiement invalide")
-    # Pour la démo, on crée une commande fictive avec les produits du panier
     order = Order(
         user_id=user.id,
         products=json.dumps([{"id": 1, "name": "PC Gamer Extreme", "price": 1499.99, "qty": 1}]),
@@ -308,7 +310,6 @@ def admin_orders(db: Session = Depends(get_db)):
 
 # ---------- WHATSAPP ----------
 def send_whatsapp_pywhatkit(to_number: str, message: str, wait_time: int = 30) -> bool:
-    # Importer pywhatkit à l'intérieur pour éviter le crash sur serveur headless
     try:
         import pywhatkit as kit
         kit.sendwhatmsg_instantly(
@@ -576,7 +577,7 @@ def admin_dashboard_stats(db: Session = Depends(get_db)):
         "orders_pending": orders_pending
     }
 
-# ---------- ADMIN : CONTACTS, GROUPES (existants) ----------
+# ---------- ADMIN : CONTACTS, GROUPES ----------
 @app.get("/admin/stats")
 def admin_stats(db: Session = Depends(get_db)):
     contacts_total = db.query(Contact).count()
@@ -679,7 +680,6 @@ def admin_dashboard(token: str = Header(None), token_q: str = None):
         """, status_code=401)
 
 # ---------- LANCEMENT DU SERVEUR ----------
-# Cette partie sera utilisée par Railway pour démarrer le serveur
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
