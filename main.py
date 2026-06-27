@@ -21,12 +21,7 @@ load_dotenv()
 from models import Base, Product as ProductModel, Contact, User, Order
 from products import router as products_router
 
-# Pywhatkit try
-try:
-    import pywhatkit as kit
-    PYWHATKIT_AVAILABLE = True
-except:
-    PYWHATKIT_AVAILABLE = False
+# (pas d'import global de pywhatkit ici)
 
 Base.metadata.create_all(bind=engine)
 
@@ -323,10 +318,9 @@ def admin_orders(db: Session = Depends(get_db)):
 
 # ---------- WHATSAPP ----------
 def send_whatsapp_pywhatkit(to_number: str, message: str, wait_time: int = 30) -> bool:
-    if not PYWHATKIT_AVAILABLE:
-        print(f"🔁 [SIMULATION] Message envoyé à {to_number}")
-        return True
+    # Importer pywhatkit à l'intérieur pour éviter le crash sur serveur headless
     try:
+        import pywhatkit as kit
         kit.sendwhatmsg_instantly(
             phone_no=to_number,
             message=message,
@@ -335,6 +329,9 @@ def send_whatsapp_pywhatkit(to_number: str, message: str, wait_time: int = 30) -
             close_time=5
         )
         print(f"✅ Message envoyé à {to_number}")
+        return True
+    except ImportError:
+        print(f"🔁 [SIMULATION] pywhatkit non disponible, message envoyé à {to_number}")
         return True
     except Exception as e:
         print(f"❌ Erreur pywhatkit : {e}")
@@ -691,11 +688,9 @@ def admin_dashboard(token: str = Header(None), token_q: str = None):
             </body></html>
         """, status_code=401)
 
-@app.on_event("startup")
-def startup():
-    init_db()
-    init_admin()
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(scheduled_campaign, 'cron', hour=9, minute=0)
-    scheduler.start()
-    print("⏰ Planificateur lancé : campagne automatique chaque jour à 9h00")
+# ---------- LANCEMENT DU SERVEUR ----------
+# Cette partie sera utilisée par Railway pour démarrer le serveur
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
