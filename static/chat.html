@@ -9,9 +9,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-        * {
-            font-family: 'Inter', sans-serif;
-        }
+        * { font-family: 'Inter', sans-serif; }
 
         body {
             background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
@@ -38,9 +36,7 @@
             color: white !important;
         }
 
-        .navbar-custom .navbar-brand i {
-            margin-right: 8px;
-        }
+        .navbar-custom .navbar-brand i { margin-right: 8px; }
 
         .navbar-custom .nav-link {
             color: rgba(255, 255, 255, 0.85) !important;
@@ -148,13 +144,8 @@
             display: block;
         }
 
-        .message.user .time {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .message.bot .time {
-            color: #94a3b8;
-        }
+        .message.user .time { color: rgba(255, 255, 255, 0.7); }
+        .message.bot .time { color: #94a3b8; }
 
         /* --- INDICATEUR DE TYPAGE --- */
         .typing-indicator {
@@ -234,21 +225,16 @@
             transform: none !important;
         }
 
-        /* --- STATUT OLLAMA --- */
-        .ollama-status {
+        /* --- STATUT IA --- */
+        .ai-status {
             font-size: 0.8rem;
             color: #94a3b8;
             margin-top: 8px;
             text-align: center;
         }
 
-        .ollama-status .online {
-            color: #059669;
-        }
-
-        .ollama-status .offline {
-            color: #dc2626;
-        }
+        .ai-status .online { color: #059669; }
+        .ai-status .offline { color: #dc2626; }
 
         /* --- FOOTER --- */
         .footer-custom {
@@ -285,8 +271,6 @@
                     <li class="nav-item"><a class="nav-link" href="/static/index.html">Accueil</a></li>
                     <li class="nav-item"><a class="nav-link" href="/static/catalogue.html">Catalogue</a></li>
                     <li class="nav-item"><a class="nav-link" href="/static/cart.html">🛒 Panier</a></li>
-                    
-                   
                     <li class="nav-item"><a class="nav-link active" href="/static/chat.html">💬 Chat</a></li>
                     <li class="nav-item"><a class="nav-link" href="/static/contact.html">Contact</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="goToDashboard()">👤 Mon compte</a></li>
@@ -321,9 +305,9 @@
                 <button id="sendBtn"><i class="bi bi-send"></i> Envoyer</button>
             </div>
 
-            <!-- Statut Ollama -->
-            <div class="ollama-status" id="ollamaStatus">
-                <i class="bi bi-circle-fill offline"></i> Vérification du service IA...
+            <!-- Statut de l'IA -->
+            <div class="ai-status" id="aiStatus">
+                <i class="bi bi-circle-fill online"></i> Assistant IA prêt (Groq)
             </div>
         </div>
     </div>
@@ -341,28 +325,10 @@
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const typingIndicator = document.getElementById('typingIndicator');
-        const ollamaStatus = document.getElementById('ollamaStatus');
+        const aiStatus = document.getElementById('aiStatus');
 
         // --- Historique de la conversation ---
-        let conversationHistory = [];  // tableau d'objets {role, content}
-
-        // --- Vérifier le statut d'Ollama ---
-        async function checkOllamaStatus() {
-            try {
-                const res = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(2000) });
-                if (res.ok) {
-                    ollamaStatus.innerHTML = '<i class="bi bi-circle-fill online"></i> Service IA connecté (Ollama)';
-                    ollamaStatus.className = 'ollama-status online';
-                    return true;
-                } else {
-                    throw new Error('Service indisponible');
-                }
-            } catch (e) {
-                ollamaStatus.innerHTML = '<i class="bi bi-circle-fill offline"></i> ⚠️ Ollama non accessible. Vérifie que le serveur est lancé.';
-                ollamaStatus.className = 'ollama-status offline';
-                return false;
-            }
-        }
+        let conversationHistory = [];
 
         // --- Ajouter un message ---
         function addMessage(text, sender, isError = false) {
@@ -375,10 +341,8 @@
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Ajouter à l'historique (sauf pour les messages d'erreur)
             if (!isError) {
                 conversationHistory.push({ role: sender === 'user' ? 'user' : 'assistant', content: text });
-                // Limiter l'historique à 20 messages maximum (10 échanges)
                 if (conversationHistory.length > 20) {
                     conversationHistory = conversationHistory.slice(-20);
                 }
@@ -406,7 +370,6 @@
             const token = getToken();
             if (!token) return;
 
-            // Afficher le message de l'utilisateur
             addMessage(message, 'user');
             messageInput.value = '';
             messageInput.focus();
@@ -415,22 +378,18 @@
             sendBtn.disabled = true;
 
             try {
-                // Vérifier Ollama
-                const isOllamaReady = await checkOllamaStatus();
-                if (!isOllamaReady) {
-                    addMessage('⚠️ Le service IA n\'est pas disponible. Vérifie que le serveur Ollama est lancé dans un autre terminal.', 'bot', true);
-                    typingIndicator.style.display = 'none';
-                    sendBtn.disabled = false;
-                    return;
-                }
+                // Construire le corps de la requête (x-www-form-urlencoded)
+                const formData = new URLSearchParams();
+                formData.append('message', message);
+                formData.append('history', JSON.stringify(conversationHistory.slice(0, -1)));
 
-                // Envoyer l'historique (sans le dernier message qui vient d'être ajouté)
-                const historyToSend = conversationHistory.slice(0, -1);  // exclure le message qu'on vient d'ajouter
-                const historyJson = JSON.stringify(historyToSend);
-
-                const response = await fetch(`/chat?message=${encodeURIComponent(message)}&history=${encodeURIComponent(historyJson)}`, {
+                const response = await fetch('/chat', {
                     method: 'POST',
-                    headers: { 'token': token }
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'token': token
+                    },
+                    body: formData.toString()
                 });
 
                 const data = await response.json();
@@ -449,14 +408,14 @@
                 typingIndicator.style.display = 'none';
 
                 if (response.ok) {
-                    addMessage(data.reponse, 'bot');
+                    addMessage(data.reponse || 'Désolé, je n\'ai pas de réponse.', 'bot');
                 } else {
                     addMessage('❌ ' + (data.detail || 'Erreur de connexion'), 'bot', true);
                 }
             } catch (error) {
                 typingIndicator.style.display = 'none';
                 addMessage('❌ Erreur réseau. Veuillez réessayer.', 'bot', true);
-                console.error(error);
+                console.error('Erreur chat:', error);
             }
 
             sendBtn.disabled = false;
@@ -470,7 +429,9 @@
 
         // --- Message de bienvenue ---
         addMessage('👋 Bonjour ! Je suis l\'assistant IA de TechShop. Comment puis-je vous aider aujourd\'hui ?', 'bot');
-        checkOllamaStatus();
+
+        // --- Statut de l'IA (toujours actif avec Groq) ---
+        aiStatus.innerHTML = '<i class="bi bi-circle-fill online"></i> Assistant IA prêt (Groq)';
     </script>
 </body>
 </html>
