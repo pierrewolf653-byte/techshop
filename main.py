@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from apscheduler.schedulers.background import BackgroundScheduler
+from groq import Groq  # <--- NOUVEAU : import Groq
 
 load_dotenv()
 
@@ -191,7 +192,7 @@ def get_profile(token: str = Header(...), db: Session = Depends(get_db)):
     except JWTError:
         raise HTTPException(401, "Token invalide ou expiré")
 
-# ---------- CHAT IA AVEC HISTORIQUE ----------
+# ---------- CHAT IA AVEC GROQ (remplace Ollama) ----------
 @app.post("/chat")
 async def chat(message: str, history: str = "", token: str = Header(...)):
     """
@@ -199,6 +200,7 @@ async def chat(message: str, history: str = "", token: str = Header(...)):
     history : chaîne JSON contenant l'historique des messages précédents
               (ex: [{"role":"user","content":"bonjour"},{"role":"assistant","content":"bonjour"}])
     """
+    # 1. Vérification du token JWT
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
@@ -207,60 +209,48 @@ async def chat(message: str, history: str = "", token: str = Header(...)):
     except JWTError:
         raise HTTPException(401, "Token invalide ou expiré")
 
-    # --- Construire le prompt avec historique ---
-    messages = []
-    # Message système
-    messages.append({
-        "role": "system",
-        "content": "Tu es un assistant commercial pour TechShop, un site de vente de matériel informatique. Réponds de manière professionnelle et chaleureuse."
-    })
+    # 2. Construction des messages
+    messages = [
+        {
+            "role": "system",
+            "content": "Tu es un assistant commercial pour TechShop, un site de vente de matériel informatique. Réponds de manière professionnelle et chaleureuse."
+        }
+    ]
 
-    # Ajouter l'historique si présent
     if history:
         try:
             history_list = json.loads(history)
-            # Limiter à 10 échanges maximum pour éviter un contexte trop long
             if len(history_list) > 20:
                 history_list = history_list[-20:]
             messages.extend(history_list)
         except:
             pass
 
-    # Ajouter le nouveau message
     messages.append({"role": "user", "content": message})
 
-    # --- Appel à Ollama ---
+    # 3. Appel à l'API Groq
     try:
-        # Construire le prompt à partir des messages
-        prompt = ""
-        for m in messages:
-            if m["role"] == "system":
-                prompt += f"System: {m['content']}\n"
-            elif m["role"] == "user":
-                prompt += f"User: {m['content']}\n"
-            else:
-                prompt += f"Assistant: {m['content']}\n"
-        prompt += "Assistant:"
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key:
+            raise HTTPException(500, "GROQ_API_KEY non définie dans les variables d'environnement")
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "http://localhost:11434/api/generate",
-                json={
-                    "model": "llama3.2:3b",
-                    "prompt": prompt,
-                    "stream": False,
-                    "max_tokens": 300,
-                    "temperature": 0.7
-                },
-                timeout=30.0
-            )
-            if response.status_code != 200:
-                raise HTTPException(500, "Erreur Ollama")
-            data = response.json()
-            reply = data.get("response", "Désolé, je n'ai pas de réponse.")
-            return {"reponse": reply}
+        client = Groq(api_key=groq_api_key)
+
+        chat_completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",  # Modèle gratuit et rapide
+            messages=messages,
+            temperature=0.7,
+            max_tokens=300,
+            top_p=1,
+            stream=False
+        )
+
+        reply = chat_completion.choices[0].message.content
+        return {"reponse": reply}
+
     except Exception as e:
-        raise HTTPException(500, f"Erreur Ollama : {str(e)}")
+        print(f"Erreur Groq : {str(e)}")
+        raise HTTPException(500, f"Erreur de l'IA : {str(e)}")
 
 # ---------- PANIER ET PAIEMENT ----------
 @app.post("/cart/add")
